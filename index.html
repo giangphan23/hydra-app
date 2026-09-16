@@ -1,0 +1,1738 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-180.png">
+<title>Hydra</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+  :root{
+    --bg:#F4F9FA;
+    --surface:#FFFFFF;
+    --surface-2:#E9F2F3;
+    --text:#0F2B2E;
+    --text-muted:#5B7C7A;
+    --border:#D7E6E6;
+    --accent:#0E7C86;
+    --accent-strong:#0A5F68;
+    --accent-soft:#CDEBEC;
+    --amber:#E8973F;
+    --amber-strong:#B8712B;
+    --water-deep:#0E7C86;
+    --water-mid:#26A6AC;
+    --water-light:#7FD8DC;
+    --shadow: 0 1px 2px rgba(15,43,46,0.06), 0 8px 24px -12px rgba(15,43,46,0.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#081617;
+      --surface:#0E1F21;
+      --surface-2:#12292B;
+      --text:#E7F5F4;
+      --text-muted:#8CB0AE;
+      --border:#1C3436;
+      --accent:#49CBD3;
+      --accent-strong:#7BDEE3;
+      --accent-soft:#123A3C;
+      --amber:#F0A75B;
+      --amber-strong:#FFC98A;
+      --water-deep:#0E5A61;
+      --water-mid:#17838A;
+      --water-light:#2FB2B9;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 28px -12px rgba(0,0,0,0.55);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#081617;
+    --surface:#0E1F21;
+    --surface-2:#12292B;
+    --text:#E7F5F4;
+    --text-muted:#8CB0AE;
+    --border:#1C3436;
+    --accent:#49CBD3;
+    --accent-strong:#7BDEE3;
+    --accent-soft:#123A3C;
+    --amber:#F0A75B;
+    --amber-strong:#FFC98A;
+    --water-deep:#0E5A61;
+    --water-mid:#17838A;
+    --water-light:#2FB2B9;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 28px -12px rgba(0,0,0,0.55);
+  }
+
+  *{box-sizing:border-box;}
+  /* The browser's built-in [hidden]{display:none} is a user-agent rule, so any author
+     rule that sets display (e.g. .app and .fact-overlay below, both display:flex) wins
+     over it in the cascade and leaks hidden screens onto the page. Force it here. */
+  [hidden]{ display:none !important; }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Manrope', system-ui, -apple-system, sans-serif;
+    display:flex;
+    justify-content:center;
+    padding: max(20px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+    min-height:100vh;
+  }
+  .app{
+    width:100%;
+    max-width:420px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+  }
+
+  /* ---------- header ---------- */
+  header{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    padding: 4px 2px 0;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .brand svg{width:20px;height:20px;flex:none;}
+  .brand-name{
+    font-family:'Lexend',sans-serif;
+    font-weight:600;
+    font-size:17px;
+    letter-spacing:-0.01em;
+  }
+  .info-btn{
+    border:none;
+    background:none;
+    padding:2px;
+    margin:0;
+    line-height:0;
+    color:var(--text-muted);
+    cursor:pointer;
+    border-radius:50%;
+  }
+  .info-btn svg{ width:19px; height:19px; display:block; }
+  .info-btn:hover{ color:var(--accent-strong); }
+  .info-btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .gear-btn{
+    border:none;
+    background:none;
+    padding:2px;
+    margin:0;
+    line-height:0;
+    color:var(--text-muted);
+    cursor:pointer;
+    border-radius:50%;
+    transition:transform 0.35s cubic-bezier(.34,1.56,.64,1), color 0.2s ease;
+  }
+  .gear-btn svg{ width:21px; height:21px; display:block; }
+  .gear-btn:hover{ color:var(--accent-strong); transform:rotate(45deg); }
+  .gear-btn.active{ color:var(--accent-strong); }
+  .gear-btn:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+
+  /* ---------- log button ---------- */
+  .log-row{
+    display:flex;
+    align-items:stretch;
+    gap:10px;
+  }
+  .log-btn{
+    flex:1;
+    min-width:0;
+    border:none;
+    border-radius:20px;
+    padding:17px 20px;
+    background:var(--accent);
+    color:#F3FFFE;
+    font-family:'Lexend',sans-serif;
+    font-weight:600;
+    font-size:16.5px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    cursor:pointer;
+    box-shadow:0 10px 22px -10px rgba(14,124,134,0.55);
+    transition:transform 0.12s ease, box-shadow 0.12s ease, background 0.2s ease;
+  }
+  .log-btn:active{ transform:scale(0.97); box-shadow:0 4px 12px -6px rgba(14,124,134,0.5); }
+  .log-btn svg{width:19px;height:19px;flex:none;}
+  .log-btn .amt{ opacity:0.85; font-weight:500; white-space:nowrap; }
+
+  .undo-btn{
+    flex:none;
+    width:54px;
+    border:1px solid var(--border);
+    border-radius:20px;
+    background:var(--surface);
+    color:var(--text-muted);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    transition:transform 0.12s ease, background 0.2s ease, color 0.2s ease;
+  }
+  .undo-btn svg{width:19px;height:19px;}
+  .undo-btn:disabled{ opacity:0.35; cursor:default; }
+  .undo-btn:not(:disabled):hover{ color:var(--accent-strong); background:var(--accent-soft); border-color:var(--accent-soft); }
+  .undo-btn:not(:disabled):active{ transform:scale(0.94); }
+
+  /* ---------- servings rows (AM / PM) ---------- */
+  .servings-block{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .period-row{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+  }
+  .period-row + .period-row{
+    padding-top:10px;
+    border-top:1px solid var(--border);
+  }
+  .period-label{
+    font-size:10.5px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--text-muted);
+    padding:0 2px;
+  }
+  .servings{
+    display:flex;
+    justify-content:center;
+    align-items:flex-end;
+    gap:14px;
+    flex-wrap:wrap;
+    padding:6px 4px 2px;
+    min-height:62px;
+  }
+  .bottle-wrap{
+    position:relative;
+    width:36px;height:62px;
+    display:inline-flex;
+    align-items:flex-end;
+    justify-content:center;
+    flex:none;
+  }
+  .bottle{
+    width:100%;height:100%;
+    flex:none;
+    transform-origin:50% 100%;
+  }
+  .bottle.bottle-fill-pop{
+    animation:bottle-pop 0.5s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes bottle-pop{
+    0%{ transform:scale(0.55) translateY(6px); }
+    55%{ transform:scale(1.16) translateY(-4px); }
+    100%{ transform:scale(1) translateY(0); }
+  }
+  .bottle-ripple{
+    position:absolute;
+    left:50%; top:36%;
+    width:34px; height:34px;
+    margin:-17px 0 0 -17px;
+    border-radius:50%;
+    background:radial-gradient(circle, var(--water-light) 0%, transparent 70%);
+    opacity:0.85;
+    pointer-events:none;
+    animation:bottle-ripple 0.55s ease-out forwards;
+  }
+  @keyframes bottle-ripple{
+    0%{ transform:scale(0.25); opacity:0.85; }
+    100%{ transform:scale(2.3); opacity:0; }
+  }
+
+  /* ---------- stats ---------- */
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+  }
+  .stat{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:12px 10px;
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+    align-items:flex-start;
+  }
+  .stat-label{
+    font-size:10.5px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--text-muted);
+  }
+  .stat-value{
+    font-family:'Lexend',sans-serif;
+    font-weight:700;
+    font-size:16.5px;
+    font-variant-numeric:tabular-nums;
+  }
+  .stat-value.accent{ color:var(--accent-strong); }
+  .stat-value.warm{ color:var(--amber); }
+  .stat-sub{
+    font-size:10px;
+    font-weight:600;
+    color:var(--text-muted);
+    margin-top:1px;
+  }
+  .streak-badge{
+    display:flex;
+    align-items:center;
+    gap:3px;
+    font-size:10.5px;
+    font-weight:700;
+    color:var(--amber);
+    margin-top:1px;
+  }
+  .streak-badge .emoji{
+    font-size:13px;
+    line-height:1;
+    animation:badge-pop 0.4s cubic-bezier(.3,1.6,.5,1);
+  }
+  @keyframes badge-pop{
+    0%{ transform:scale(0.3) rotate(-15deg); }
+    60%{ transform:scale(1.25) rotate(6deg); }
+    100%{ transform:scale(1) rotate(0deg); }
+  }
+
+  /* ---------- history ---------- */
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:16px 16px 14px;
+    box-shadow:var(--shadow);
+  }
+  .card h2{
+    margin:0 0 12px;
+    font-family:'Lexend',sans-serif;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--text);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .card h2 small{
+    font-family:'Manrope',sans-serif;
+    font-weight:600;
+    font-size:11px;
+    color:var(--text-muted);
+  }
+  .history{
+    display:flex;
+    align-items:flex-end;
+    gap:8px;
+    height:88px;
+  }
+  .hist-col{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    height:100%;
+    justify-content:flex-end;
+  }
+  .hist-bar-track{
+    width:100%;
+    max-width:26px;
+    flex:1;
+    display:flex;
+    align-items:flex-end;
+    border-radius:8px;
+    background:var(--surface-2);
+    overflow:hidden;
+    position:relative;
+  }
+  .hist-bar{
+    width:100%;
+    height:2%;
+    background:var(--water-mid);
+    border-radius:8px 8px 0 0;
+    transition:height 0.4s ease;
+  }
+  .hist-bar.hit{ background:var(--accent); }
+  .hist-bar.today{ background:var(--amber); }
+  .hist-goal-tick{
+    position:absolute;
+    left:0; right:0;
+    height:2px;
+    background:var(--border);
+  }
+  .hist-day{
+    font-size:10px;
+    font-weight:700;
+    color:var(--text-muted);
+  }
+  .hist-day.is-today{ color:var(--accent-strong); }
+
+  /* ---------- settings ---------- */
+  .settings-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(6,18,19,0);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:68;
+    padding:24px;
+    pointer-events:none;
+    transition:background 0.25s ease;
+  }
+  .settings-overlay.show{
+    background:rgba(4,13,14,0.72);
+    backdrop-filter:blur(2px);
+    pointer-events:auto;
+  }
+  .settings-panel{
+    width:100%;
+    max-width:360px;
+    background:var(--surface);
+    border:2px solid var(--accent);
+    border-radius:24px;
+    padding:22px 22px 20px;
+    box-shadow:0 2px 4px rgba(0,0,0,0.18), 0 20px 48px -14px rgba(0,0,0,0.55);
+    transform:scale(0.85);
+    opacity:0;
+    transition:transform 0.32s cubic-bezier(.2,.9,.35,1), opacity 0.28s ease;
+  }
+  .settings-overlay.show .settings-panel{
+    transform:scale(1);
+    opacity:1;
+  }
+  .settings-panel h2{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    font-size:19px;
+    font-weight:700;
+    margin-bottom:16px;
+  }
+  .settings-close-btn{
+    border:none;
+    background:none;
+    padding:2px;
+    margin:0 -4px 0 0;
+    line-height:0;
+    color:var(--text-muted);
+    cursor:pointer;
+    border-radius:50%;
+  }
+  .settings-close-btn svg{ width:16px; height:16px; display:block; }
+  .settings-close-btn:hover{ color:var(--accent-strong); }
+  .settings-body{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .field{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .field label{ font-size:13px; font-weight:600; color:var(--text); }
+  .field input:not(.toggle-switch){
+    width:92px;
+    text-align:right;
+    padding:8px 10px;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:var(--surface-2);
+    color:var(--text);
+    font-family:'Manrope',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    font-variant-numeric:tabular-nums;
+  }
+  .field input:not(.toggle-switch):focus{ outline:2px solid var(--accent); outline-offset:1px; }
+  .settings-divider{
+    height:1px;
+    background:var(--border);
+    border:none;
+    margin:2px 0;
+  }
+  .toggle-switch{
+    -webkit-appearance:none;
+    appearance:none;
+    width:42px;
+    height:25px;
+    border-radius:999px;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    position:relative;
+    cursor:pointer;
+    flex:none;
+    transition:background 0.2s ease, border-color 0.2s ease;
+  }
+  .toggle-switch::before{
+    content:'';
+    position:absolute;
+    top:2px; left:2px;
+    width:19px; height:19px;
+    border-radius:50%;
+    background:#fff;
+    box-shadow:0 1px 2px rgba(0,0,0,0.25);
+    transition:transform 0.2s cubic-bezier(.4,1.6,.6,1);
+  }
+  .toggle-switch:checked{
+    background:var(--accent);
+    border-color:var(--accent);
+  }
+  .toggle-switch:checked::before{ transform:translateX(17px); }
+  .toggle-switch:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  .save-btn{
+    align-self:flex-end;
+    border:none;
+    background:var(--accent-soft);
+    color:var(--accent-strong);
+    font-family:'Manrope',sans-serif;
+    font-weight:700;
+    font-size:12.5px;
+    padding:8px 14px;
+    border-radius:10px;
+    cursor:pointer;
+  }
+  .save-btn:hover{ background:var(--water-light); }
+
+  /* ---------- intro screen ---------- */
+  .back-btn{
+    align-self:flex-start;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    border:none;
+    background:none;
+    color:var(--accent-strong);
+    font-family:'Manrope',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    padding:6px 4px;
+    margin:2px 0 2px -4px;
+    cursor:pointer;
+  }
+  .back-btn svg{ width:16px; height:16px; }
+  .back-btn:hover{ color:var(--accent); }
+  .intro-hero{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:2px 2px 0;
+  }
+  .intro-hero svg{ width:26px; height:26px; flex:none; }
+  .intro-hero h1{
+    margin:0;
+    font-family:'Lexend',sans-serif;
+    font-weight:700;
+    font-size:21px;
+    letter-spacing:-0.01em;
+    text-wrap:balance;
+  }
+  .intro-lead{
+    margin:0;
+    padding:0 2px;
+    font-size:14.5px;
+    line-height:1.55;
+    color:var(--text-muted);
+  }
+  .steps{
+    list-style:none;
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .steps li{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .step-no{
+    flex:none;
+    width:20px;height:20px;
+    border-radius:50%;
+    background:var(--accent-soft);
+    color:var(--accent-strong);
+    font-family:'Lexend',sans-serif;
+    font-weight:700;
+    font-size:11px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-top:1px;
+  }
+  .steps li span:last-child{
+    font-size:13.5px;
+    line-height:1.5;
+    color:var(--text);
+  }
+  .steps li strong{ font-weight:700; }
+  .intro-note{
+    margin:0;
+    padding:0 2px;
+    font-size:12px;
+    line-height:1.5;
+    color:var(--text-muted);
+  }
+
+  /* ---------- confetti ---------- */
+  .confetti-layer{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    overflow:hidden;
+    z-index:60;
+  }
+  .confetti-piece{
+    position:absolute;
+    left:50%;
+    top:30vh;
+    border-radius:2px;
+    opacity:0;
+    animation:confetti-burst linear forwards;
+    will-change:transform, opacity;
+    box-shadow:0 0 0 rgba(0,0,0,0);
+  }
+  .confetti-piece.round{ border-radius:50%; }
+  @keyframes confetti-burst{
+    0%{ transform:translate(-50%,-50%) scale(0.3) rotate(0deg); opacity:1; animation-timing-function:cubic-bezier(.1,.75,.2,1); }
+    12%{ transform:translate(calc(-50% + var(--bx)), calc(-50% + var(--by))) scale(1.15) rotate(var(--r1)); opacity:1; animation-timing-function:cubic-bezier(.45,0,.7,.25); }
+    38%{ transform:translate(calc(-50% + var(--mx1)), calc(-50% + var(--my1))) scale(1) rotate(var(--r2)); opacity:1; animation-timing-function:cubic-bezier(.45,0,.7,.3); }
+    64%{ transform:translate(calc(-50% + var(--mx2)), calc(-50% + var(--my2))) scale(0.95) rotate(var(--r3)); opacity:1; animation-timing-function:cubic-bezier(.5,0,.75,.35); }
+    88%{ transform:translate(calc(-50% + var(--mx3)), calc(-50% + var(--my3))) scale(0.9) rotate(var(--r4)); opacity:0.95; }
+    100%{ transform:translate(calc(-50% + var(--ex)), calc(-50% + var(--ey))) scale(0.85) rotate(var(--r5)); opacity:0; }
+  }
+  .confetti-pop{
+    position:fixed;
+    left:50%;
+    top:30vh;
+    width:10px;
+    height:10px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(255,255,255,0.95), var(--water-light) 35%, transparent 72%);
+    transform:translate(-50%,-50%) scale(0);
+    opacity:0.9;
+    pointer-events:none;
+    z-index:59;
+    animation:confetti-pop 0.5s ease-out forwards;
+  }
+  @keyframes confetti-pop{
+    0%{ transform:translate(-50%,-50%) scale(0); opacity:0.9; }
+    55%{ opacity:0.5; }
+    100%{ transform:translate(-50%,-50%) scale(16); opacity:0; }
+  }
+  .bubble-piece{
+    position:absolute;
+    left:0; bottom:-24px;
+    border-radius:50%;
+    opacity:0;
+    pointer-events:none;
+    will-change:transform, opacity;
+    animation:bubble-rise ease-in forwards;
+  }
+  @keyframes bubble-rise{
+    0%{ transform:translate(0,0) scale(0.6); opacity:0; }
+    12%{ opacity:var(--bop,0.8); }
+    80%{ opacity:calc(var(--bop,0.8) * 0.7); }
+    100%{ transform:translate(var(--bx,0), -92vh) scale(1); opacity:0; }
+  }
+  .celebrate-text{
+    position:fixed;
+    left:50%;
+    top:30vh;
+    transform:translate(-50%,-50%) scale(0.2) rotate(-8deg);
+    font-family:'Lexend',sans-serif;
+    font-weight:800;
+    font-size:clamp(26px, 8.5vw, 38px);
+    letter-spacing:0.01em;
+    color:#fff;
+    -webkit-text-stroke:1.5px var(--accent-strong);
+    text-shadow:0 3px 0 var(--accent-strong), 0 6px 18px rgba(0,0,0,0.3), 0 0 26px rgba(255,255,255,0.4);
+    opacity:0;
+    pointer-events:none;
+    z-index:75;
+    white-space:nowrap;
+  }
+  .celebrate-text.show{
+    animation:celebrate-pop 2.1s cubic-bezier(.2,1.4,.4,1) forwards;
+  }
+  @keyframes celebrate-pop{
+    0%{ transform:translate(-50%,-50%) scale(0.2) rotate(-8deg); opacity:0; }
+    15%{ transform:translate(-50%,-50%) scale(1.28) rotate(4deg); opacity:1; }
+    26%{ transform:translate(-50%,-50%) scale(1) rotate(-2deg); opacity:1; }
+    75%{ transform:translate(-50%,-58%) scale(1.02) rotate(0deg); opacity:1; }
+    100%{ transform:translate(-50%,-78%) scale(0.9) rotate(0deg); opacity:0; }
+  }
+
+  /* ---------- milestone toast ---------- */
+  .toast{
+    position:fixed;
+    left:50%;
+    top:max(18px, env(safe-area-inset-top));
+    transform:translate(-50%,-140%);
+    background:var(--accent-strong);
+    color:#F3FFFE;
+    font-family:'Lexend',sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    padding:11px 18px;
+    border-radius:999px;
+    box-shadow:0 10px 24px -8px rgba(10,95,104,0.45);
+    z-index:70;
+    display:flex;
+    align-items:center;
+    gap:7px;
+    white-space:nowrap;
+    opacity:0;
+    transition:transform 0.35s cubic-bezier(.34,1.56,.64,1), opacity 0.3s ease;
+    pointer-events:none;
+  }
+  .toast.show{
+    transform:translate(-50%,0);
+    opacity:1;
+  }
+
+  /* ---------- did-you-know popup ---------- */
+  .fact-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(6,18,19,0);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:65;
+    padding:24px;
+    pointer-events:none;
+    transition:background 0.25s ease;
+  }
+  .fact-overlay.show{
+    background:rgba(4,13,14,0.72);
+    backdrop-filter:blur(2px);
+    pointer-events:auto;
+  }
+  .fact-popup{
+    width:100%;
+    max-width:360px;
+    background:var(--surface);
+    border:2px solid var(--accent);
+    border-radius:24px;
+    padding:32px 28px 26px;
+    box-shadow:0 2px 4px rgba(0,0,0,0.18), 0 20px 48px -14px rgba(0,0,0,0.55);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+    text-align:center;
+    transform:scale(0.85);
+    opacity:0;
+    transition:transform 0.32s cubic-bezier(.2,.9,.35,1), opacity 0.28s ease;
+  }
+  .fact-overlay.show .fact-popup{
+    transform:scale(1);
+    opacity:1;
+  }
+  .fact-icon{
+    width:72px;
+    height:72px;
+    border-radius:50%;
+    background:radial-gradient(circle at 30% 28%, var(--water-light), var(--accent-soft) 68%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:36px;
+    line-height:1;
+    box-shadow:0 6px 18px -8px rgba(14,124,134,0.35);
+  }
+  .fact-icon.pop{
+    animation:fact-icon-pop 0.5s cubic-bezier(.3,1.6,.5,1);
+  }
+  @keyframes fact-icon-pop{
+    0%{ transform:scale(0.4) rotate(-12deg); }
+    60%{ transform:scale(1.16) rotate(6deg); }
+    100%{ transform:scale(1) rotate(0deg); }
+  }
+  .fact-popup h2{
+    margin:0;
+    font-family:'Lexend',sans-serif;
+    font-size:19px;
+    font-weight:700;
+    color:var(--text);
+  }
+  .fact-popup .fact-text{
+    margin:0;
+    font-size:16px;
+    line-height:1.6;
+    color:var(--text);
+  }
+  .fact-popup-close{
+    align-self:center;
+    border:none;
+    background:var(--accent-soft);
+    color:var(--accent-strong);
+    font-family:'Manrope',sans-serif;
+    font-weight:700;
+    font-size:13.5px;
+    letter-spacing:0.02em;
+    padding:10px 32px;
+    border-radius:12px;
+    cursor:pointer;
+    margin-top:6px;
+  }
+  .fact-popup-close:hover{ background:var(--water-light); }
+
+  /* ---------- wind-down popup (muted variant of the fact popup) ---------- */
+  .winddown-overlay.show{
+    background:rgba(4,13,14,0.42);
+    backdrop-filter:blur(1px);
+  }
+  .winddown-popup{
+    border-color:var(--border);
+    box-shadow:0 2px 4px rgba(0,0,0,0.12), 0 16px 36px -14px rgba(0,0,0,0.35);
+  }
+  .winddown-icon{
+    width:60px;
+    height:60px;
+    font-size:32px;
+    background:radial-gradient(circle at 30% 28%, var(--surface-2), var(--accent-soft) 78%);
+    box-shadow:none;
+  }
+  .winddown-close{
+    background:var(--surface-2);
+    color:var(--text-muted);
+  }
+  .winddown-close:hover{ background:var(--border); }
+</style>
+
+</head>
+<body>
+<div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
+<div class="celebrate-text" id="celebrateText" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"><span id="toastText"></span></div>
+
+<div class="fact-overlay" id="factOverlay" hidden>
+  <div class="fact-popup" id="factPopup" role="dialog" aria-label="Did you know">
+    <div class="fact-icon" id="factIcon" aria-hidden="true">💧</div>
+    <h2>Did you know?</h2>
+    <p class="fact-text" id="funFactText"></p>
+    <button class="fact-popup-close" id="factPopupClose">Got it</button>
+  </div>
+</div>
+
+<div class="fact-overlay winddown-overlay" id="windDownOverlay" hidden>
+  <div class="fact-popup winddown-popup" id="windDownPopup" role="dialog" aria-label="Hydration check-in">
+    <div class="fact-icon winddown-icon" aria-hidden="true">💧</div>
+    <h2>You're all set</h2>
+    <p class="fact-text">You've had plenty of water today — nice work staying on top of it.</p>
+    <button class="fact-popup-close winddown-close" id="windDownClose">Got it</button>
+  </div>
+</div>
+
+<div class="settings-overlay" id="settingsOverlay" hidden>
+  <div class="card settings-panel" id="settingsPanel" role="dialog" aria-label="Settings" aria-modal="true">
+    <h2>
+      Settings
+      <button class="settings-close-btn" id="settingsCloseBtn" aria-label="Close settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </h2>
+    <div class="settings-body">
+      <div class="field">
+        <label for="goalInput">Daily goal (ml)</label>
+        <input type="number" id="goalInput" step="100" min="500">
+      </div>
+      <div class="field">
+        <label for="servingInput">Serving size (ml)</label>
+        <input type="number" id="servingInput" step="50" min="50">
+      </div>
+      <hr class="settings-divider">
+      <div class="field">
+        <label for="soundToggle">Sound effects</label>
+        <input type="checkbox" id="soundToggle" class="toggle-switch">
+      </div>
+      <div class="field">
+        <label for="vibrationToggle">Vibration</label>
+        <input type="checkbox" id="vibrationToggle" class="toggle-switch">
+      </div>
+      <button class="save-btn" id="saveSettingsBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="mainScreen">
+
+  <header>
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 2.5C12 2.5 5 11 5 15.5C5 19.64 8.13 22.5 12 22.5C15.87 22.5 19 19.64 19 15.5C19 11 12 2.5 12 2.5Z" fill="var(--accent)"/></svg>
+      <span class="brand-name">Hydra</span>
+      <button class="info-btn" id="infoBtn" aria-label="About Hydra">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="7.8" r="1.15" fill="currentColor"/><path d="M12 11v5.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <button class="gear-btn" id="settingsBtn" aria-label="Settings" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 15.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 13.2c.04-.4.06-.8.06-1.2s-.02-.8-.06-1.2l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.4 7.4 0 0 0-2.08-1.2l-.36-2.54a.5.5 0 0 0-.5-.44h-3.84a.5.5 0 0 0-.5.44l-.36 2.54c-.75.29-1.45.7-2.08 1.2l-2.39-.96a.5.5 0 0 0-.6.22L2.45 8.58a.5.5 0 0 0 .12.64L4.6 10.8c-.04.4-.06.8-.06 1.2s.02.8.06 1.2l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.13.22.39.31.6.22l2.39-.96c.63.5 1.33.91 2.08 1.2l.36 2.54a.5.5 0 0 0 .5.44h3.84a.5.5 0 0 0 .5-.44l.36-2.54c.75-.29 1.45-.7 2.08-1.2l2.39.96c.21.09.47 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64L19.4 13.2Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      </button>
+  </header>
+
+  <div class="card">
+    <h2>Today's bottles <small id="bottlesHint">0 of 6 · goal 4,000 ml</small></h2>
+    <div class="servings-block">
+      <div class="period-row">
+        <span class="period-label">AM</span>
+        <div class="servings" id="servingsRowAM"></div>
+      </div>
+      <div class="period-row">
+        <span class="period-label">PM</span>
+        <div class="servings" id="servingsRowPM"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="log-row">
+    <button class="log-btn" id="logBtn">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 2.5C12 2.5 5 11 5 15.5C5 19.64 8.13 22.5 12 22.5C15.87 22.5 19 19.64 19 15.5C19 11 12 2.5 12 2.5Z" fill="currentColor"/></svg>
+      Log a drink <span class="amt" id="servingLabel">(700 ml)</span>
+    </button>
+    <button class="undo-btn" id="undoBtn" disabled aria-label="Undo last drink" title="Undo last">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>
+    </button>
+  </div>
+
+  <div class="stats">
+    <div class="stat">
+      <span class="stat-label">Today</span>
+      <span class="stat-value" id="statToday">0 ml</span>
+      <span class="stat-sub" id="statTodaySub"></span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Remaining</span>
+      <span class="stat-value warm" id="statRemaining">4,000 ml</span>
+    </div>
+    <div class="stat">
+      <span class="stat-label">Streak</span>
+      <span class="stat-value accent" id="statStreak">0 days</span>
+      <span class="streak-badge" id="streakBadge" hidden></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Last 7 days <small id="historyHint">Daily goal: 4,000 ml</small></h2>
+    <div class="history" id="historyRow"></div>
+  </div>
+
+</div>
+
+<div class="app intro" id="introScreen" hidden>
+
+  <button class="back-btn" id="backBtn">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4.5 7 12l7.5 7.5"/></svg>
+    Home
+  </button>
+
+  <div class="intro-hero">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M12 2.5C12 2.5 5 11 5 15.5C5 19.64 8.13 22.5 12 22.5C15.87 22.5 19 19.64 19 15.5C19 11 12 2.5 12 2.5Z" fill="var(--accent)"/></svg>
+    <h1>About Hydra</h1>
+  </div>
+
+  <p class="intro-lead">Hydra is a simple daily water tracker. Set a goal, log each bottle you finish with one tap, and watch your progress fill in — no accounts, no syncing, just today's water.</p>
+
+  <div class="card">
+    <h2>How to use it</h2>
+    <ol class="steps">
+      <li><span class="step-no">1</span><span>Tap <strong>Log a drink</strong> every time you finish a bottle. Each tap logs one 700 ml serving.</span></li>
+      <li><span class="step-no">2</span><span>Watch the bottles under <strong>Today's bottles</strong> fill one by one as you log, until you reach your daily goal.</span></li>
+      <li><span class="step-no">3</span><span>Check <strong>Today</strong>, <strong>Remaining</strong>, and <strong>Streak</strong> for a quick read on where you stand.</span></li>
+      <li><span class="step-no">4</span><span>Logged by mistake? Tap <strong>Undo last</strong> to remove your most recent entry.</span></li>
+      <li><span class="step-no">5</span><span>Tap the <strong>gear icon</strong> in the top right to change your goal or serving size, or turn off sound and vibration.</span></li>
+      <li><span class="step-no">6</span><span>After each log, a quick <strong>Did you know?</strong> popup shares a water fact — tap "Got it" or outside it to dismiss early.</span></li>
+      <li><span class="step-no">7</span><span><strong>Last 7 days</strong> shows your recent history, and your log resets on its own each night.</span></li>
+    </ol>
+  </div>
+
+  <p class="intro-note">Everything is saved right on this device — there's no account and nothing is uploaded.</p>
+
+</div>
+
+<script>
+(function(){
+  var STORE_KEY = 'hydra-water-tracker-v1';
+
+  // Over-goal zones, expressed as a multiple of the daily goal.
+  // BONUS_ZONE_START: where the fun "bonus tier" celebrations begin (100% = right at goal).
+  // WIND_DOWN_CUTOFF: where celebrations stop and the calm wind-down message takes over (200% = double the goal).
+  var BONUS_ZONE_START = 1.0;
+  var WIND_DOWN_CUTOFF = 2.0;
+
+  function todayKey(d){
+    d = d || new Date();
+    var y = d.getFullYear(), m = String(d.getMonth()+1).padStart(2,'0'), day = String(d.getDate()).padStart(2,'0');
+    return y+'-'+m+'-'+day;
+  }
+
+  function loadStore(){
+    try{
+      var raw = localStorage.getItem(STORE_KEY);
+      if(raw){
+        var parsed = JSON.parse(raw);
+        parsed.entries = parsed.entries || {};
+        parsed.settings = Object.assign({ goalMl: 4000, servingMl: 700, soundOn: true, vibrationOn: true }, parsed.settings || {});
+        parsed.celebrated = parsed.celebrated || {};
+        return parsed;
+      }
+    }catch(e){}
+    return { entries:{}, settings:{ goalMl:4000, servingMl:700, soundOn:true, vibrationOn:true }, celebrated:{} };
+  }
+
+  // ---------- sound + vibration ----------
+  var audioCtx = null;
+
+  function soundEnabled(){ return store.settings.soundOn !== false; }
+  function vibrationEnabled(){ return store.settings.vibrationOn !== false; }
+
+  function ensureAudioCtx(){
+    if(!audioCtx){
+      try{ audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch(e){ audioCtx = null; }
+    }
+    if(audioCtx && audioCtx.state === 'suspended'){
+      try{ audioCtx.resume(); }catch(e){}
+    }
+    return audioCtx;
+  }
+
+  function vibrate(pattern){
+    if(!vibrationEnabled()) return;
+    if(navigator.vibrate){ try{ navigator.vibrate(pattern); }catch(e){} }
+  }
+
+  function playToneAt(ctx, freq, startOffset, duration, type, peakVol){
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = type;
+    var t0 = ctx.currentTime + startOffset;
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.linearRampToValueAtTime(peakVol, t0 + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + duration + 0.02);
+  }
+
+  function playLogSound(){
+    if(!soundEnabled()) return;
+    var ctx = ensureAudioCtx();
+    if(!ctx) return;
+    // a quick "glug" — pitch sweeping down like a drop of water
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = 'sine';
+    var t0 = ctx.currentTime;
+    osc.frequency.setValueAtTime(700, t0);
+    osc.frequency.exponentialRampToValueAtTime(260, t0 + 0.14);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.linearRampToValueAtTime(0.22, t0 + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.16);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + 0.18);
+  }
+
+  function playUndoSound(){
+    if(!soundEnabled()) return;
+    var ctx = ensureAudioCtx();
+    if(!ctx) return;
+    var osc = ctx.createOscillator();
+    var gain = ctx.createGain();
+    osc.type = 'sine';
+    var t0 = ctx.currentTime;
+    osc.frequency.setValueAtTime(320, t0);
+    osc.frequency.exponentialRampToValueAtTime(200, t0 + 0.1);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.linearRampToValueAtTime(0.16, t0 + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.12);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + 0.14);
+  }
+
+  function playMilestoneSound(){
+    if(!soundEnabled()) return;
+    var ctx = ensureAudioCtx();
+    if(!ctx) return;
+    playToneAt(ctx, 523.25, 0,    0.16, 'sine', 0.16); // C5
+    playToneAt(ctx, 659.25, 0.09, 0.18, 'sine', 0.16); // E5
+  }
+
+  function playGoalSound(){
+    if(!soundEnabled()) return;
+    var ctx = ensureAudioCtx();
+    if(!ctx) return;
+    var notes = [523.25, 659.25, 783.99, 1046.5]; // C5 E5 G5 C6
+    for(var i=0;i<notes.length;i++){
+      playToneAt(ctx, notes[i], i*0.09, 0.32, 'triangle', 0.15);
+    }
+  }
+
+  function playBonusSound(){
+    if(!soundEnabled()) return;
+    var ctx = ensureAudioCtx();
+    if(!ctx) return;
+    // a quick bubbly, rising run — brighter and lighter than the milestone chime
+    var notes = [587.33, 739.99, 987.77]; // D5 F#5 B5
+    for(var i=0;i<notes.length;i++){
+      playToneAt(ctx, notes[i], i*0.07, 0.16, 'sine', 0.14);
+    }
+  }
+
+  function playWindDownSound(){
+    if(!soundEnabled()) return;
+    var ctx = ensureAudioCtx();
+    if(!ctx) return;
+    // one soft, low, quiet tone — calm, not celebratory
+    playToneAt(ctx, 392.00, 0, 0.55, 'sine', 0.06); // G4
+  }
+
+  function ensureCelebrated(key){
+    if(!store.celebrated) store.celebrated = {};
+    if(!store.celebrated[key]) store.celebrated[key] = {};
+    return store.celebrated[key];
+  }
+
+  var CELEBRATE_MESSAGES = ['YAY!', 'CONGRATS!', 'WOO HOO!', 'YOU DID IT!', 'NAILED IT!', 'AMAZING!', 'BOOM!', 'YES!', 'CRUSHED IT!'];
+
+  function nextCelebrateMessage(){
+    if(typeof store.msgIndex !== 'number') store.msgIndex = 0;
+    var msg = CELEBRATE_MESSAGES[store.msgIndex % CELEBRATE_MESSAGES.length];
+    store.msgIndex++;
+    saveStore();
+    return msg;
+  }
+
+  function showCelebrateText(){
+    var el = document.getElementById('celebrateText');
+    if(!el) return;
+    el.classList.remove('show');
+    el.textContent = nextCelebrateMessage();
+    void el.offsetWidth; // restart animation
+    el.classList.add('show');
+    setTimeout(function(){ el.classList.remove('show'); }, 2150);
+  }
+
+  function fireConfetti(){
+    var layer = document.getElementById('confettiLayer');
+    if(!layer) return;
+
+    showCelebrateText();
+    playGoalSound();
+    vibrate([30,50,30,50,90]);
+
+    var pop = document.createElement('div');
+    pop.className = 'confetti-pop';
+    layer.appendChild(pop);
+    setTimeout(function(){ if(pop.parentNode) pop.parentNode.removeChild(pop); }, 600);
+
+    var colors = ['#FF3B5C','#FF8A00','#FFD400','#2ED47A','#00C2D1','#3D6BFF','#B24CFF','#FF5FA2','#00E0A4','#FFC531'];
+    var count = 150;
+    for(var i=0;i<count;i++){
+      (function(){
+        var piece = document.createElement('div');
+        piece.className = 'confetti-piece' + (Math.random() < 0.4 ? ' round' : '');
+        var size = 5 + Math.random()*9;
+        var angle = Math.random()*Math.PI*2;
+        var burstDist = 80 + Math.random()*190;
+        var bx = Math.round(Math.cos(angle)*burstDist);
+        var by = Math.round(Math.sin(angle)*burstDist*0.75 - 20);
+        var fall = 380 + Math.random()*480;
+        var ex = bx + Math.round(Math.random()*130 - 65);
+        var ey = by + fall;
+
+        // gravity-shaped fall: y accelerates (t^2), matching keyframe stops at 12/38/64/88/100%
+        var u38 = (38-12)/88, u64 = (64-12)/88, u88 = (88-12)/88;
+        var my1 = Math.round(by + fall * Math.pow(u38, 2));
+        var my2 = Math.round(by + fall * Math.pow(u64, 2));
+        var my3 = Math.round(by + fall * Math.pow(u88, 2));
+
+        // air-resistance wobble layered on the straight bx->ex drift
+        var wobCycles = 1.5 + Math.random();
+        var wobAmp = 14 + Math.random()*22;
+        var wobPhase = Math.random()*Math.PI*2;
+        function xAt(u){ return bx + (ex-bx)*u + wobAmp*Math.sin(u*Math.PI*wobCycles + wobPhase); }
+        var mx1 = Math.round(xAt(u38));
+        var mx2 = Math.round(xAt(u64));
+        var mx3 = Math.round(xAt(u88));
+
+        var r1 = Math.round(Math.random()*260 - 130);
+        var spinDir = Math.random() < 0.5 ? -1 : 1;
+        var rFinal = r1 + spinDir * Math.round(720 + Math.random()*680);
+        var r2 = Math.round(r1 + (rFinal-r1)*u38);
+        var r3 = Math.round(r1 + (rFinal-r1)*u64);
+        var r4 = Math.round(r1 + (rFinal-r1)*u88);
+
+        var duration = 2.5 + Math.random()*1.0;
+        var delay = Math.random()*0.2;
+        piece.style.width = size + 'px';
+        piece.style.height = (size*1.5) + 'px';
+        piece.style.background = colors[Math.floor(Math.random()*colors.length)];
+        piece.style.animationDuration = duration + 's';
+        piece.style.animationDelay = delay + 's';
+        piece.style.setProperty('--bx', bx + 'px');
+        piece.style.setProperty('--by', by + 'px');
+        piece.style.setProperty('--mx1', mx1 + 'px');
+        piece.style.setProperty('--my1', my1 + 'px');
+        piece.style.setProperty('--mx2', mx2 + 'px');
+        piece.style.setProperty('--my2', my2 + 'px');
+        piece.style.setProperty('--mx3', mx3 + 'px');
+        piece.style.setProperty('--my3', my3 + 'px');
+        piece.style.setProperty('--ex', ex + 'px');
+        piece.style.setProperty('--ey', ey + 'px');
+        piece.style.setProperty('--r1', r1 + 'deg');
+        piece.style.setProperty('--r2', r2 + 'deg');
+        piece.style.setProperty('--r3', r3 + 'deg');
+        piece.style.setProperty('--r4', r4 + 'deg');
+        piece.style.setProperty('--r5', rFinal + 'deg');
+        layer.appendChild(piece);
+        setTimeout(function(){
+          if(piece.parentNode) piece.parentNode.removeChild(piece);
+        }, (duration+delay+0.15)*1000);
+      })();
+    }
+  }
+
+  // Lighter, rising bubble effect for bonus-zone tiers (past goal, before wind-down).
+  // Blue/teal palette only, floats upward — visually distinct from the falling,
+  // multicolor confetti used for the main goal celebration.
+  function fireBubbles(){
+    var layer = document.getElementById('confettiLayer');
+    if(!layer) return;
+    var colors = ['var(--water-light)','var(--water-mid)','var(--accent)','var(--accent-soft)'];
+    var count = 34;
+    for(var i=0;i<count;i++){
+      (function(){
+        var b = document.createElement('div');
+        b.className = 'bubble-piece';
+        var size = 8 + Math.random()*18;
+        var leftPct = 6 + Math.random()*88;
+        var drift = Math.round(Math.random()*70 - 35);
+        var duration = 1.7 + Math.random()*1.1;
+        var delay = Math.random()*0.5;
+        var opacity = 0.55 + Math.random()*0.35;
+        b.style.width = size + 'px';
+        b.style.height = size + 'px';
+        b.style.left = leftPct + '%';
+        b.style.background = colors[Math.floor(Math.random()*colors.length)];
+        b.style.animationDuration = duration + 's';
+        b.style.animationDelay = delay + 's';
+        b.style.setProperty('--bx', drift + 'px');
+        b.style.setProperty('--bop', opacity);
+        layer.appendChild(b);
+        setTimeout(function(){
+          if(b.parentNode) b.parentNode.removeChild(b);
+        }, (duration+delay+0.2)*1000);
+      })();
+    }
+  }
+
+  function saveStore(){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }catch(e){}
+  }
+
+  var store = loadStore();
+  var toastTimer = null;
+  var prevLoggedCount = null;
+  var MILESTONE_MESSAGES = {
+    25: '💧 Quarter way there',
+    50: '🌊 Halfway there!',
+    75: '💪 Almost there — 75%'
+  };
+
+  // Bonus-zone tiers: fire in order as today's total climbs from goal (100%) toward
+  // the wind-down cutoff (200%). Each fires once per day, tracked via cel[id].
+  var BONUS_TIERS = [
+    { id:'bonus125', ratio:1.25, emoji:'💦', label:'Overflow!' },
+    { id:'bonus150', ratio:1.5,  emoji:'🌊', label:'Making waves' },
+    { id:'bonus175', ratio:1.75, emoji:'🐋', label:'Whale mode' }
+  ];
+
+  var els = {
+    mainScreen: document.getElementById('mainScreen'),
+    introScreen: document.getElementById('introScreen'),
+    infoBtn: document.getElementById('infoBtn'),
+    backBtn: document.getElementById('backBtn'),
+    settingsBtn: document.getElementById('settingsBtn'),
+    settingsPanel: document.getElementById('settingsPanel'),
+    settingsOverlay: document.getElementById('settingsOverlay'),
+    settingsCloseBtn: document.getElementById('settingsCloseBtn'),
+    bottlesHint: document.getElementById('bottlesHint'),
+    logBtn: document.getElementById('logBtn'),
+    servingLabel: document.getElementById('servingLabel'),
+    undoBtn: document.getElementById('undoBtn'),
+    servingsRowAM: document.getElementById('servingsRowAM'),
+    servingsRowPM: document.getElementById('servingsRowPM'),
+    statToday: document.getElementById('statToday'),
+    statTodaySub: document.getElementById('statTodaySub'),
+    statRemaining: document.getElementById('statRemaining'),
+    statStreak: document.getElementById('statStreak'),
+    streakBadge: document.getElementById('streakBadge'),
+    historyRow: document.getElementById('historyRow'),
+    historyHint: document.getElementById('historyHint'),
+    goalInput: document.getElementById('goalInput'),
+    servingInput: document.getElementById('servingInput'),
+    saveSettingsBtn: document.getElementById('saveSettingsBtn'),
+    soundToggle: document.getElementById('soundToggle'),
+    vibrationToggle: document.getElementById('vibrationToggle'),
+    toast: document.getElementById('toast'),
+    toastText: document.getElementById('toastText'),
+    funFactText: document.getElementById('funFactText'),
+    factOverlay: document.getElementById('factOverlay'),
+    factIcon: document.getElementById('factIcon'),
+    factPopupClose: document.getElementById('factPopupClose'),
+    windDownOverlay: document.getElementById('windDownOverlay'),
+    windDownClose: document.getElementById('windDownClose')
+  };
+
+  var FUN_FACTS = [
+    { icon:'💧', text:"Your body is about 60% water." },
+    { icon:'🧬', text:"Water helps carry nutrients to your cells." },
+    { icon:'😴', text:"Mild dehydration can leave you feeling tired and unfocused." },
+    { icon:'🧠', text:"Your brain is around 75% water." },
+    { icon:'🍽️', text:"Drinking water can help control hunger and cravings." },
+    { icon:'🦴', text:"Water helps keep your joints moving smoothly." },
+    { icon:'💨', text:"You lose water just by breathing, even without sweating." },
+    { icon:'🫘', text:"Water helps your kidneys clear out waste." },
+    { icon:'✨', text:"Your skin needs water to stay soft and elastic." },
+    { icon:'🎯', text:"Losing just 1-2% of your body's water can hurt focus and mood." },
+    { icon:'🌡️', text:"Water helps regulate your body temperature." },
+    { icon:'❤️', text:"Blood is about 90% water." },
+    { icon:'⚡', text:"Staying hydrated can boost your energy levels." },
+    { icon:'💓', text:"Water helps your heart pump blood more easily." },
+    { icon:'💪', text:"Muscles are about 75% water, so they need it to work well." },
+    { icon:'🤕', text:"Dehydration is a common trigger for headaches." },
+    { icon:'🫁', text:"Your lungs are about 83% water." },
+    { icon:'🌅', text:"A glass of water in the morning helps kick-start digestion." },
+    { icon:'🥵', text:"Feeling thirsty is a sign you're already a little dehydrated." },
+    { icon:'0️⃣', text:"Water has zero calories, making it the easiest way to refresh." },
+    { icon:'🌟', text:"Good hydration supports healthy, glowing skin." },
+    { icon:'🥕', text:"Water helps your body absorb vitamins and minerals." },
+    { icon:'🐢', text:"Even mild dehydration can slow down your metabolism." },
+    { icon:'🏃', text:"Sweating during exercise means you need more water than usual." },
+    { icon:'🛡️', text:"Water cushions and protects your spinal cord and joints." },
+    { icon:'🦠', text:"Staying hydrated helps your body fight off illness." },
+    { icon:'☕', text:"Tea and coffee count toward your fluids, but water is still best." },
+    { icon:'😊', text:"Drinking enough water can improve mood and reduce fatigue." }
+  ];
+
+  function pickFactIndex(mode){
+    // mode 'next': advance sequentially through the list (used after each log)
+    // no mode: pick a starting fact silently if one isn't set yet (no popup shown)
+    if(mode === 'next'){
+      store.factIndex = (typeof store.factIndex === 'number' ? (store.factIndex + 1) % FUN_FACTS.length : Math.floor(Math.random()*FUN_FACTS.length));
+      saveStore();
+    } else if(typeof store.factIndex !== 'number'){
+      store.factIndex = Math.floor(Math.random()*FUN_FACTS.length);
+      saveStore();
+    }
+  }
+
+  var factPopupTimer = null;
+
+  function openFactPopup(){
+    if(!els.funFactText || !els.factOverlay) return;
+    var fact = FUN_FACTS[store.factIndex % FUN_FACTS.length];
+    els.funFactText.textContent = fact.text;
+    if(els.factIcon){
+      els.factIcon.textContent = fact.icon;
+      els.factIcon.classList.remove('pop');
+      void els.factIcon.offsetWidth; // restart animation
+      els.factIcon.classList.add('pop');
+    }
+    els.factOverlay.hidden = false;
+    void els.factOverlay.offsetWidth; // restart transition
+    els.factOverlay.classList.add('show');
+    if(factPopupTimer) clearTimeout(factPopupTimer);
+    factPopupTimer = setTimeout(closeFactPopup, 7000);
+  }
+
+  function closeFactPopup(){
+    if(!els.factOverlay) return;
+    if(factPopupTimer){ clearTimeout(factPopupTimer); factPopupTimer = null; }
+    els.factOverlay.classList.remove('show');
+    setTimeout(function(){ els.factOverlay.hidden = true; }, 220);
+  }
+
+  // Wind-down popup: fires once per day the first time today's total crosses the
+  // wind-down cutoff. Calm and quiet by design — no bounce animation, no auto-dismiss
+  // timer (the person closes it when ready), soft sound, single light vibration pulse.
+  function openWindDownPopup(){
+    if(!els.windDownOverlay) return;
+    els.windDownOverlay.hidden = false;
+    void els.windDownOverlay.offsetWidth; // restart transition
+    els.windDownOverlay.classList.add('show');
+    playWindDownSound();
+    vibrate(16);
+  }
+
+  function closeWindDownPopup(){
+    if(!els.windDownOverlay) return;
+    els.windDownOverlay.classList.remove('show');
+    setTimeout(function(){ els.windDownOverlay.hidden = true; }, 220);
+  }
+
+  function showToast(msg, soundFn, vibPattern){
+    els.toastText.textContent = msg;
+    els.toast.classList.add('show');
+    if(toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ els.toast.classList.remove('show'); }, 2400);
+    (soundFn || playMilestoneSound)();
+    vibrate(vibPattern || 22);
+  }
+
+  function fmt(n){ return Math.round(n).toLocaleString('en-US'); }
+
+  var COMPARISON_UNITS = [
+    { ml:250,  singular:'glass of water',  plural:'glasses of water' },
+    { ml:330,  singular:'can of soda',     plural:'cans of soda' },
+    { ml:500,  singular:'large bottle',    plural:'large bottles' },
+    { ml:200,  singular:'cup of tea',      plural:'cups of tea' },
+    { ml:1000, singular:'liter bottle',    plural:'liter bottles' }
+  ];
+
+  function dayOfYear(d){
+    var start = new Date(d.getFullYear(), 0, 0);
+    return Math.floor((d - start) / 86400000);
+  }
+
+  function comparisonText(totalMl){
+    if(totalMl <= 0) return '';
+    var unit = COMPARISON_UNITS[dayOfYear(new Date()) % COMPARISON_UNITS.length];
+    var count = totalMl / unit.ml;
+    var rounded = Math.round(count*10) / 10;
+    if(rounded <= 0) return '';
+    var countStr = (rounded % 1 === 0) ? String(rounded) : rounded.toFixed(1);
+    var word = rounded === 1 ? unit.singular : unit.plural;
+    return '≈ ' + countStr + ' ' + word;
+  }
+
+  function bottleSVG(filled, isNew, isBonus){
+    var bodyColor = filled ? (isBonus ? 'var(--amber)' : 'var(--accent)') : 'var(--surface-2)';
+    var strokeColor = filled ? (isBonus ? 'var(--amber-strong)' : 'var(--accent-strong)') : 'var(--border)';
+    var capColor = strokeColor;
+    var svg = '<svg class="bottle'+(isNew?' bottle-fill-pop':'')+'" viewBox="0 0 20 34">'+
+      '<path d="M7 1H13V3.4H14C15.66 3.4 17 4.79 17 6.5V29.5C17 31.43 15.43 33 13.5 33H6.5C4.57 33 3 31.43 3 29.5V6.5C3 4.79 4.34 3.4 6 3.4H7V1Z" '+
+        'fill="'+bodyColor+'" stroke="'+strokeColor+'" stroke-width="1.6" stroke-linejoin="round"/>'+
+      '<rect x="7" y="1" width="6" height="2.4" rx="0.4" fill="'+capColor+'"/>'+
+    '</svg>';
+    return '<span class="bottle-wrap">'+svg+(isNew?'<span class="bottle-ripple"></span>':'')+'</span>';
+  }
+
+  function todayTotal(){
+    var arr = store.entries[todayKey()] || [];
+    return arr.reduce(function(a,b){ return a+b; }, 0);
+  }
+
+  function dayTotal(key){
+    var arr = store.entries[key] || [];
+    return arr.reduce(function(a,b){ return a+b; }, 0);
+  }
+
+  // Classifies a total (ml) against the goal into one of three zones:
+  // 'normal'    — below goal
+  // 'bonus'     — at or past goal, below the wind-down cutoff (fun celebration territory)
+  // 'wind-down' — past the wind-down cutoff (celebrations stop, one calm message instead)
+  function getZone(totalMl, goal){
+    if(!goal || goal <= 0) return 'normal';
+    var ratio = totalMl / goal;
+    if(ratio >= WIND_DOWN_CUTOFF) return 'wind-down';
+    if(ratio >= BONUS_ZONE_START) return 'bonus';
+    return 'normal';
+  }
+
+  function computeStreak(){
+    var goal = store.settings.goalMl;
+    var streak = 0;
+    var d = new Date();
+    // only count a day if it's complete: start from yesterday, and include today only if goal already met
+    if(dayTotal(todayKey(d)) >= goal){ streak = 1; }
+    for(var i=1;i<400;i++){
+      var probe = new Date(d);
+      probe.setDate(d.getDate()-i);
+      var total = dayTotal(todayKey(probe));
+      if(total >= goal){ streak++; } else { break; }
+    }
+    return streak;
+  }
+
+  var STREAK_TIERS = [
+    { min:30, emoji:'🏆', label:'30-day' },
+    { min:7,  emoji:'⭐', label:'7-day' },
+    { min:3,  emoji:'🔥', label:'3-day' }
+  ];
+  var lastBadgeLabel = undefined;
+
+  function updateStreakBadge(streak){
+    if(!els.streakBadge) return;
+    var tier = null;
+    for(var i=0;i<STREAK_TIERS.length;i++){
+      if(streak >= STREAK_TIERS[i].min){ tier = STREAK_TIERS[i]; break; }
+    }
+    if(!tier){
+      els.streakBadge.hidden = true;
+      lastBadgeLabel = null;
+      return;
+    }
+    els.streakBadge.hidden = false;
+    if(tier.label !== lastBadgeLabel){
+      els.streakBadge.innerHTML = '<span class="emoji">'+tier.emoji+'</span>'+tier.label+' streak';
+      lastBadgeLabel = tier.label;
+    }
+  }
+
+  function render(){
+    var goal = store.settings.goalMl;
+    var serving = store.settings.servingMl;
+    var total = todayTotal();
+    var overGoal = total >= goal;
+    var key = todayKey();
+    var cel = ensureCelebrated(key);
+    var zone = getZone(total, goal);
+    var windDownJustFired = false;
+
+    if(zone === 'wind-down'){
+      // Crossing straight into wind-down (even from a single big log) means every
+      // lower milestone is implicitly already passed — mark them all so nothing
+      // stale pops up later, but only actually celebrate the wind-down moment once.
+      if(!cel[100] || !cel.bonus175){
+        cel[25] = true; cel[50] = true; cel[75] = true; cel[100] = true;
+        BONUS_TIERS.forEach(function(t){ cel[t.id] = true; });
+        saveStore();
+      }
+      if(!cel.winddown){
+        cel.winddown = true;
+        saveStore();
+        openWindDownPopup();
+        windDownJustFired = true;
+      }
+      // else: already fired today — stay quiet. Bottles/stats below still update.
+    } else if(overGoal && !cel[100]){
+      cel[100] = true;
+      cel[25] = true; cel[50] = true; cel[75] = true;
+      saveStore();
+      fireConfetti();
+    } else if(zone === 'bonus'){
+      var ratio = total / goal;
+      var newlyCrossedBonus = BONUS_TIERS.filter(function(t){
+        if(ratio >= t.ratio && !cel[t.id]){ cel[t.id] = true; return true; }
+        return false;
+      });
+      if(newlyCrossedBonus.length){
+        saveStore();
+        var tier = newlyCrossedBonus[newlyCrossedBonus.length-1];
+        fireBubbles();
+        showToast(tier.emoji + ' ' + tier.label, playBonusSound, [15,30,15,30,50]);
+      }
+    } else {
+      var pct = goal > 0 ? (total/goal)*100 : 0;
+      var newlyCrossed = [25,50,75].filter(function(t){
+        if(pct >= t && !cel[t]){ cel[t] = true; return true; }
+        return false;
+      });
+      if(newlyCrossed.length){
+        saveStore();
+        showToast(MILESTONE_MESSAGES[newlyCrossed[newlyCrossed.length-1]]);
+      }
+    }
+
+    els.servingLabel.textContent = '(' + fmt(serving) + ' ml)';
+    els.statToday.textContent = fmt(total) + ' ml';
+    if(els.statTodaySub) els.statTodaySub.textContent = comparisonText(total);
+    els.statRemaining.textContent = overGoal ? ('+' + fmt(total-goal) + ' ml') : (fmt(goal-total) + ' ml');
+    var streak = computeStreak();
+    els.statStreak.textContent = streak + (streak===1 ? ' day' : ' days');
+    updateStreakBadge(streak);
+
+    // servings rows — one bottle per log, enough slots to cover the goal, split
+    // across an AM row (first half of the goal's slots) and a PM row (second half).
+    // Bottles beyond the goal's slot count render gold (bonus/wind-down servings)
+    // and land in the PM row, since they come after the regular slots are filled.
+    var slots = Math.max(1, Math.ceil(goal/serving));
+    var amSlots = Math.ceil(slots/2);
+    var loggedCount = (store.entries[todayKey()] || []).length;
+    var justFilledIndex = (prevLoggedCount !== null && loggedCount > prevLoggedCount) ? (loggedCount - 1) : -1;
+    var amHtml = '', pmHtml = '';
+    for(var i=0;i<Math.max(slots, loggedCount);i++){
+      var bottleHtml = bottleSVG(i < loggedCount, i === justFilledIndex, i >= slots);
+      if(i < amSlots){ amHtml += bottleHtml; } else { pmHtml += bottleHtml; }
+    }
+    els.servingsRowAM.innerHTML = amHtml;
+    els.servingsRowPM.innerHTML = pmHtml;
+    prevLoggedCount = loggedCount;
+    els.bottlesHint.textContent = loggedCount + ' of ' + slots + ' · goal ' + fmt(goal) + ' ml' + (overGoal ? ' — reached' : '');
+
+    els.undoBtn.disabled = loggedCount === 0;
+
+    // history
+    els.historyHint.textContent = 'Daily goal: ' + fmt(goal) + ' ml';
+    var maxVal = goal;
+    for(var i=6;i>=0;i--){
+      var d2 = new Date();
+      d2.setDate(d2.getDate()-i);
+      maxVal = Math.max(maxVal, dayTotal(todayKey(d2)));
+    }
+    var rowHtml = '';
+    for(var j=6;j>=0;j--){
+      var dd = new Date();
+      dd.setDate(dd.getDate()-j);
+      var k = todayKey(dd);
+      var val = dayTotal(k);
+      var barPct = Math.max(2, Math.min(100, (val/maxVal)*100));
+      var isToday = j===0;
+      var hit = val >= goal;
+      var dayLabel = dd.toLocaleDateString('en-US', { weekday:'narrow' });
+      var goalTickPct = Math.min(100, (goal/maxVal)*100);
+      rowHtml += '<div class="hist-col">'+
+        '<div class="hist-bar-track">'+
+          '<div class="hist-goal-tick" style="bottom:'+goalTickPct+'%"></div>'+
+          '<div class="hist-bar '+(isToday?'today':(hit?'hit':''))+'" style="height:'+barPct+'%"></div>'+
+        '</div>'+
+        '<span class="hist-day '+(isToday?'is-today':'')+'">'+dayLabel+'</span>'+
+      '</div>';
+    }
+    els.historyRow.innerHTML = rowHtml;
+
+    els.goalInput.value = goal;
+    els.servingInput.value = serving;
+    els.soundToggle.checked = store.settings.soundOn !== false;
+    els.vibrationToggle.checked = store.settings.vibrationOn !== false;
+
+    return windDownJustFired;
+  }
+
+  els.infoBtn.addEventListener('click', function(){
+    closeSettings();
+    els.mainScreen.hidden = true;
+    els.introScreen.hidden = false;
+  });
+
+  els.backBtn.addEventListener('click', function(){
+    els.introScreen.hidden = true;
+    els.mainScreen.hidden = false;
+  });
+
+  var settingsCloseTimer = null;
+
+  function settingsOpen(){
+    return els.settingsOverlay.classList.contains('show');
+  }
+
+  function openSettings(){
+    if(settingsCloseTimer){ clearTimeout(settingsCloseTimer); settingsCloseTimer = null; }
+    closeFactPopup();
+    closeWindDownPopup();
+    els.settingsOverlay.hidden = false;
+    void els.settingsOverlay.offsetWidth; // restart transition
+    els.settingsOverlay.classList.add('show');
+    els.settingsBtn.classList.add('active');
+    els.settingsBtn.setAttribute('aria-expanded', 'true');
+  }
+
+  function closeSettings(){
+    els.settingsOverlay.classList.remove('show');
+    if(settingsCloseTimer) clearTimeout(settingsCloseTimer);
+    settingsCloseTimer = setTimeout(function(){ els.settingsOverlay.hidden = true; }, 220);
+    els.settingsBtn.classList.remove('active');
+    els.settingsBtn.setAttribute('aria-expanded', 'false');
+  }
+
+  els.settingsBtn.addEventListener('click', function(){
+    if(settingsOpen()){ closeSettings(); } else { openSettings(); }
+  });
+
+  els.settingsCloseBtn.addEventListener('click', closeSettings);
+
+  els.settingsOverlay.addEventListener('click', function(e){
+    if(e.target === els.settingsOverlay) closeSettings();
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' || e.key === 'Esc'){
+      if(settingsOpen()) closeSettings();
+      else if(els.windDownOverlay && !els.windDownOverlay.hidden) closeWindDownPopup();
+      else if(els.factOverlay && !els.factOverlay.hidden) closeFactPopup();
+    }
+  });
+
+  els.logBtn.addEventListener('click', function(){
+    var key = todayKey();
+    if(!store.entries[key]) store.entries[key] = [];
+    store.entries[key].push(store.settings.servingMl);
+    saveStore();
+    var windDownFired = render();
+    if(!windDownFired){
+      pickFactIndex('next');
+      openFactPopup();
+    }
+    playLogSound();
+    vibrate(14);
+  });
+
+  els.undoBtn.addEventListener('click', function(){
+    var key = todayKey();
+    if(store.entries[key] && store.entries[key].length){
+      store.entries[key].pop();
+      saveStore();
+      render();
+      playUndoSound();
+      vibrate([10,35,10]);
+    }
+  });
+
+  els.saveSettingsBtn.addEventListener('click', function(){
+    var g = parseInt(els.goalInput.value, 10);
+    var s = parseInt(els.servingInput.value, 10);
+    if(g && g>0) store.settings.goalMl = g;
+    if(s && s>0) store.settings.servingMl = s;
+    saveStore();
+    render();
+    closeSettings();
+  });
+
+  els.soundToggle.addEventListener('change', function(){
+    store.settings.soundOn = els.soundToggle.checked;
+    saveStore();
+    if(store.settings.soundOn) playLogSound();
+  });
+
+  els.vibrationToggle.addEventListener('change', function(){
+    store.settings.vibrationOn = els.vibrationToggle.checked;
+    saveStore();
+    if(store.settings.vibrationOn) vibrate(12);
+  });
+
+  if(els.factPopupClose) els.factPopupClose.addEventListener('click', closeFactPopup);
+  if(els.factOverlay) els.factOverlay.addEventListener('click', function(e){
+    if(e.target === els.factOverlay) closeFactPopup();
+  });
+
+  if(els.windDownClose) els.windDownClose.addEventListener('click', closeWindDownPopup);
+  if(els.windDownOverlay) els.windDownOverlay.addEventListener('click', function(e){
+    if(e.target === els.windDownOverlay) closeWindDownPopup();
+  });
+
+  render();
+  pickFactIndex();
+})();
+</script>
+</body>
+</html>
