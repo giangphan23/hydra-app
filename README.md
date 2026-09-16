@@ -7,7 +7,7 @@ updated: 2026-09-16
 
 A simple, mobile-first daily water tracker built as a Claude Artifact (no login, no backend — everything is saved in the browser's local storage on the device it's opened on).
 
-**Live app:** https://claude.ai/code/artifact/66f6fa8d-ef32-4c87-aaa9-4ef6e679778c
+**Live app:** https://giangphan23.github.io/hydra-app/
 **Source code:** [`index.html`](index.html) — the full standalone HTML file behind the live app, kept in sync with every publish.
 
 ## Purpose
